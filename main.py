@@ -41,6 +41,7 @@ def add_to_row(soup:bs4.BeautifulSoup, row:bs4.element.Tag, days_left:float, don
     Uses BeautifulSoup to modify the HTML before actually rendered
 """
 def on_deck_browser_will_render_content(deck_browser: DeckBrowser, content: OverviewContent):
+    config = mw.addonManager.getConfig(__name__)
     soup = bs4.BeautifulSoup(content.tree, features="lxml")
 
     #change table headers
@@ -69,14 +70,16 @@ def on_deck_browser_will_render_content(deck_browser: DeckBrowser, content: Over
         #not perfect with sub decks, doesn't look at if a sub deck is limiting factor
         if not per_deck_limit:
             deck_conf_id = deck["conf"]
-            config = mw.col.decks.get_config(deck_conf_id)
-            per_day = config["new"]["perDay"]
+            deck_config = mw.col.decks.get_config(deck_conf_id)
+            per_day = deck_config["new"]["perDay"]
         else:
             per_day = per_deck_limit
         
-        #find all the new cards, excluding suspended cards
+        #find all the new cards
         deck_name = deck["name"]
-        query = "is:new -is:suspended deck:\"{}\"".format(deck_name)
+
+        suspended_query = "-is:suspended" if config["include_suspended"] == 0 else "is:suspended"
+        query = "is:new {} deck:\"{}\"".format(suspended_query, deck_name)
         new_cards = len(mw.col.find_cards(query))
 
         if per_day == 0:
