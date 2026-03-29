@@ -1,0 +1,24 @@
+name: Package Addon
+
+on: [workflow_dispatch]
+
+jobs:
+  build-linux:
+
+    runs-on: ubuntu-18.04
+      
+    steps:
+    - uses: actions/checkout@v2
+    - name: Bundle Files
+      run: |
+        zip -r DaysUntilZeroNew.ankiaddon .
+        mkdir dist
+        mv DaysUntilZeroNew.ankiaddon dist/
+    - name: Generate Checksums
+      run: |
+        sha256sum dist/* > dist/sha256-checksums.txt
+    - name: Archive Pyinstaller File
+      uses: actions/upload-artifact@v2
+      with:
+        name: Ankiaddon
+        path: dist/
