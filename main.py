@@ -30,12 +30,11 @@ def add_to_row(soup:bs4.BeautifulSoup, row:bs4.element.Tag, days_left:float, don
         day_count = soup.new_tag("span", attrs={"class":"zero-count"})
         day_count.string = "-"
 
-
     new_entry.append(day_count)
 
-    row_entries = row.findChildren()
-    last_entry = row_entries[len(row_entries) - 2]
-    last_entry.parent.insert_before(new_entry)
+    row_entries = list(row.children)
+    last_entry = row_entries[len(row_entries) - 1]
+    last_entry.insert_before(new_entry)
 
 """
     Runs right after the deck browser generates HTML
@@ -50,7 +49,7 @@ def on_deck_browser_will_render_content(deck_browser: DeckBrowser, content: Over
     th = soup.new_tag("th", attrs={"align":"center"})
     th.string = "Days to 0 new"
     #add one before the end
-    headers = soup.tr.findChildren()
+    headers = list(soup.tr.children)
     headers[len(headers) - 2].insert_after(th)
 
 
