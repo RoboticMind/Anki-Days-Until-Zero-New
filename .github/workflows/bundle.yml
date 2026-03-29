@@ -5,7 +5,7 @@ on: [workflow_dispatch]
 jobs:
   build-linux:
 
-    runs-on: ubuntu-18.04
+    runs-on: linux
       
     steps:
     - uses: actions/checkout@v2
@@ -17,7 +17,7 @@ jobs:
     - name: Generate Checksums
       run: |
         sha256sum dist/* > dist/sha256-checksums.txt
-    - name: Archive Pyinstaller File
+    - name: Archive File
       uses: actions/upload-artifact@v2
       with:
         name: Ankiaddon
