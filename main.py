@@ -11,7 +11,7 @@ from aqt import gui_hooks
 from aqt.deckbrowser import DeckBrowser
 from aqt.overview import OverviewContent
 
-from math import ceil
+from math import ceil, inf
 from datetime import datetime, timedelta
 import bs4
 
@@ -27,7 +27,10 @@ def on_deck_browser_will_render_content(deck_browser: DeckBrowser, content: Over
 
     th = soup.new_tag("th", attrs={"align":"center"})
     th.string = "Days to 0 new"
-    soup.tr.append(th)
+    #add one before the end
+    headers = soup.tr.findChildren()
+    headers[len(headers) - 2].insert_after(th)
+
 
     #change entries
     mapping = {}
@@ -55,16 +58,21 @@ def on_deck_browser_will_render_content(deck_browser: DeckBrowser, content: Over
         query = "is:new -is:suspended deck:\"{}\"".format(deck_name)
         new_cards = len(mw.col.find_cards(query))
 
-        days_left = new_cards / per_day
-
-        if days_left == 0:
-            continue
+        if per_day == 0:
+            days_left = inf
+        else:
+            days_left = new_cards / per_day
         
-        future_date = datetime.now() + timedelta(days=ceil(days_left))
+        if days_left == inf:
+            future_date = datetime.max
+        else:
+            future_date = datetime.now() + timedelta(days=ceil(days_left))
 
         #eg. May 21 if current year, May 2040 if further ahead
         date_fmt:str
-        if future_date.year != datetime.now().year:
+        if days_left == 0:
+            date_fmt = "done"
+        elif future_date.year != datetime.now().year:
             date_fmt = "%b %Y"
         else:
             date_fmt = "%b %d"
@@ -73,19 +81,22 @@ def on_deck_browser_will_render_content(deck_browser: DeckBrowser, content: Over
         row = soup.find("tr", {"id": str(deck_id)})
         if not row: #collapsed or other similar scenarios
             continue 
-        
+
         #add the days + date to the row
         #html looks something like
         #<td>x days<span class="zero-count">(date)</span></td>
-        new_entry = soup.new_tag("td", "")
+        new_entry = soup.new_tag("td", align="center")
         new_entry.string = "{:.1f} days ".format(days_left)
 
         day_count = soup.new_tag("span", attrs={"class":"zero-count"})
         day_count.string = "(" + done_date + ")"
         new_entry.append(day_count)
 
-        row.append(new_entry)
+        row_entries = row.findChildren()
+        last_entry = row_entries[len(row_entries) - 2]
+        last_entry.parent.insert_before(new_entry)
 
     content.tree = str(soup)
+    print(soup.prettify())
 
 gui_hooks.deck_browser_will_render_content.append(on_deck_browser_will_render_content)
