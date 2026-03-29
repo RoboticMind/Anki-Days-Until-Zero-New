@@ -107,6 +107,5 @@ def on_deck_browser_will_render_content(deck_browser: DeckBrowser, content: Over
         add_to_row(soup, row, days_left, done_date)
 
     content.tree = str(soup)
-    print(soup.prettify())
 
 gui_hooks.deck_browser_will_render_content.append(on_deck_browser_will_render_content)
