@@ -1,16 +1,15 @@
 # import the main window object (mw) from aqt
-from aqt import mw
+from aqt import mw, gui_hooks
 # import the "show info" tool from utils.py
 from aqt.utils import showInfo, qconnect, tr
 # import all of the Qt GUI library
 from aqt.qt import *
 
-from aqt import gui_hooks
-
 #for type hints
 from aqt.deckbrowser import DeckBrowser
 from aqt.overview import OverviewContent
 
+#general utils
 from math import ceil, inf
 from datetime import datetime, timedelta
 import bs4
