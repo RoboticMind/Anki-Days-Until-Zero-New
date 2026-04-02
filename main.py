@@ -63,12 +63,16 @@ def on_deck_browser_will_render_content(deck_browser: DeckBrowser, content: Over
             continue 
         
         #check if a per deck setting is set
-        per_deck_limit = deck["newLimit"]
+        per_deck_limit = deck.get("newLimit")
+        
 
         #get conf to get per day count
         #not perfect with sub decks, doesn't look at if a sub deck is limiting factor
         if not per_deck_limit:
-            deck_conf_id = deck["conf"]
+            deck_conf_id = deck.get("conf")
+            if not deck_conf_id:
+                continue #skip custom studydecks which seem to not have this set
+
             deck_config = mw.col.decks.get_config(deck_conf_id)
             per_day = deck_config["new"]["perDay"]
         else:
