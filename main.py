@@ -90,11 +90,22 @@ def on_deck_browser_will_render_content(deck_browser: DeckBrowser, content: Over
         else:
             days_left = new_cards / per_day
         
+        #will assume you'll do the cards due today to determine the end date
+        new_cards_left_today =  mw.col.sched.deck_due_tree(deck_id).new_count
+        days_left_excluding_today = (new_cards - new_cards_left_today) / per_day
+
         if days_left == inf:
             future_date = datetime.max
         else:
-            future_date = datetime.now() + timedelta(days=ceil(days_left))
+            future_date = datetime.now() + timedelta(days=ceil(days_left_excluding_today))
 
+        #if before the rollover time the number of cards due today will show zero
+        #we'll attempt to fix that by just subtracting exactly one day which is
+        #less precise than looking at the cards today
+        rollover_hour = mw.col.get_preferences().scheduling.rollover
+        if new_cards_left_today == 0 and datetime.now().hour < rollover_hour:
+            future_date -= timedelta(days=1)
+        
         #eg. May 21 if current year, May 2040 if further ahead
         date_fmt:str
         if future_date.year != datetime.now().year:
