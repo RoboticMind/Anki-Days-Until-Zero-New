@@ -87,6 +87,7 @@ def on_deck_browser_will_render_content(deck_browser: DeckBrowser, content: Over
 
         if per_day == 0:
             days_left = inf
+            new_cards_left_today = 0
         else:
             days_left = new_cards / per_day
         
